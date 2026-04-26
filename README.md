@@ -147,9 +147,9 @@ blender your_scene.blend --background --python modelling/blender_glass_randomize
 **Output**: one `scene_XXXX.obj` (with `.mtl`) per scene; textures are copied via `path_mode='COPY'`.
 **Glass material is always named `Glass_Clear`** — the renderer uses exact-name matching.
 
-### Glass Blacklist
+### Excluding Heavy / Non-Converging Glass
 
-These glass objects produce caustics / MC noise that doesn't converge even at 60K SPP and should be excluded from the Blender source collection: `Canecao`, `CopoTulipa`, `CopoAmericano`, `TaçaTulipa`, `CopoWhisky`.
+If your glass asset pack contains meshes with intricate caustics (e.g. tulip-shaped wine glasses, whisky tumblers with thick bases) or extremely high vertex counts, those scenes may not converge to clean noise even at 60K+ SPP. After importing the asset pack with `merge_glass_objects.py`, drop them with `--exclude name1,name2,...`. There is no built-in blacklist — what to exclude is asset-pack-specific.
 
 ---
 

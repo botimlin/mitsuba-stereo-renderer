@@ -6,29 +6,19 @@ asset pack into the currently open .blend file.
 
 Usage (run inside Blender):
     blender your_base.blend --python merge_glass_objects.py -- \
-        --copos /path/to/Copos.blend
+        --copos /path/to/Copos.blend \
+        [--exclude name1,name2,...]
 
-If --copos is omitted, the script aborts with a usage hint.
+If --copos is omitted, the script aborts with a usage hint. Use --exclude to
+drop heavy or non-converging meshes after import (object names are matched
+exactly, case-sensitive). Comma-separated; surround with quotes if any name
+contains a comma.
 """
 
 import bpy
 import os
 import sys
 import argparse
-
-# ============================================================
-# Configurable blacklist
-# ============================================================
-# Glass meshes whose caustics fail to converge even at very high SPP.
-BLACKLIST = [
-    'Canecao',        # large mug
-    'CopoTulipa',     # tulip glass
-    'CopoAmericano',  # american cup
-    'TaçaTulipa',     # tulip flute
-    'CopoWhisky',     # whisky glass (also 67K verts)
-]
-
-REMOVE_BLACKLISTED = True
 
 
 def parse_args():
@@ -45,10 +35,17 @@ def parse_args():
         help="Path to the source .blend file containing a Copos collection. "
              "Falls back to the COPOS_BLEND environment variable.",
     )
+    parser.add_argument(
+        '--exclude',
+        type=str,
+        default='',
+        help="Comma-separated object names to drop after import "
+             "(e.g. heavy meshes whose caustics don't converge).",
+    )
     return parser.parse_args(argv)
 
 
-def merge_copos(copos_path: str):
+def merge_copos(copos_path: str, exclude: list):
     print("\n" + "=" * 60)
     print("Importing glass collection (Copos)")
     print("=" * 60)
@@ -92,17 +89,17 @@ def merge_copos(copos_path: str):
 
     print(f"\nImported glass objects: {len(glass_objects)}")
     for name in glass_objects:
-        status = "[blacklist]" if name in BLACKLIST else "[ok]"
+        status = "[exclude]" if name in exclude else "[ok]"
         verts = 0
         obj = bpy.data.objects.get(name)
         if obj and obj.type == 'MESH':
             verts = len(obj.data.vertices)
         print(f"  {status} {name} ({verts} verts)")
 
-    if REMOVE_BLACKLISTED:
-        print("\nRemoving blacklisted objects...")
+    if exclude:
+        print("\nRemoving excluded objects...")
         removed = 0
-        for name in BLACKLIST:
+        for name in exclude:
             if name in bpy.data.objects:
                 bpy.data.objects.remove(bpy.data.objects[name], do_unlink=True)
                 print(f"  removed: {name}")
@@ -124,4 +121,5 @@ def merge_copos(copos_path: str):
 
 if __name__ == "__main__":
     args = parse_args()
-    merge_copos(args.copos)
+    exclude = [n.strip() for n in args.exclude.split(',') if n.strip()]
+    merge_copos(args.copos, exclude)
