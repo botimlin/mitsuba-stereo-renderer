@@ -1,0 +1,29 @@
+{
+  "version": "1.2.0",
+  "description": "Texture asset index used by the Blender scene randomizer.",
+  "texture_format": "JPG, 4K tileable",
+  "categories": {
+    "furniture": {
+      "description": "傢俱紋理 - 每場景隨機分配",
+      "textures": [
+        ""
+      ]
+    },
+    "floor": {
+      "description": "地板紋理 - 每場景隨機分配",
+      "textures": [
+        ""
+      ]
+    },
+    "wall": {
+      "description": "牆壁+天花板紋理 - 每場景統一隨機",
+      "textures": [
+        ""
+      ]
+    }
+  },
+  "notes": {
+    "wall_ceiling_unified": "牆壁和天花板共用同一紋理",
+    "fallback": "如果紋理不存在，會 fallback 到純色材質"
+  }
+}

@@ -1,0 +1,14 @@
+# Mitsuba Stereo Renderer Dependencies
+# ====================================
+
+# Mitsuba 3 renderer (cuda_ad_rgb variant)
+mitsuba
+drjit
+
+# Core
+numpy
+opencv-python
+
+# EXR I/O (optional; tools fall back to mitsuba.Bitmap or cv2 when missing)
+OpenEXR
+Imath
