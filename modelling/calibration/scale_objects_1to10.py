@@ -10,12 +10,11 @@ SCALE_FACTOR = 0.1  # 1:10 比例
 
 # 要縮放的 Collections
 COLLECTIONS_TO_SCALE = [
-    'Copos',
-    'SB_Vases',
-    'SB_Lamps',
-    'SB_Plants',
-    'SB_Decor',
-    'SB_Furniture',
+    'Glass',
+    'Tables',
+    'Furniture',
+    'Cabinets',
+    'Decor',
 ]
 
 print("\n" + "=" * 60)

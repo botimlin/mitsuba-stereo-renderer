@@ -116,14 +116,14 @@ CONFIG = {
         },
     },
 
-    # Glass cups (auto-discovered from the `Copos` collection).
+    # Glass cups (auto-discovered from the `Glass` collection).
     'glass': {
         'count_range': (1, 1),
         'min_count': 1,
         'edge_margin': 8.0,
         'auto_discover': {
             'enabled': True,
-            'collection': 'Copos',
+            'collection': 'Glass',
             # Optional per-object overrides (mm). Anything not listed uses default_size.
             'sizes': {},
             'default_size': (8, 8, 15),
@@ -158,7 +158,7 @@ CONFIG = {
     'ground_furniture': {
         'enabled': True,
         'count_range': (2, 4),
-        'collection': 'SB_Furniture',
+        'collection': 'Furniture',
         'items': [],
         'rotation_z': (0, 360),
         'x_range': (-120, 120),
@@ -169,18 +169,18 @@ CONFIG = {
     'cabinets': {
         'enabled': True,
         'count_range': (1, 1),
-        'collection': 'SB_Cabinets',
+        'collection': 'Cabinets',
         'items': [],
         'rotation_z': (0, 0),
         'center_x_range': (-150, 150),
         'center_y_range': (200, 500),
     },
 
-    # Tabletop items (vases, decor — auto-discovered from `SB_Decor`).
+    # Tabletop items (vases, decor — auto-discovered from `Decor`).
     'table_items': {
         'enabled': True,
         'count_range': (0, 2),
-        'collection': 'SB_Decor',
+        'collection': 'Decor',
         'items': [],
         'rotation_z': (0, 360),
         'edge_margin': 10.0,
@@ -839,10 +839,10 @@ def create_table() -> Tuple[Optional[object], Optional[Surface]]:
     if not cfg.get('enabled', False):
         return None, None
 
-    # 隨機選擇桌子來源（先用 source_names；空清單則 fall back 到 SB_Tables collection）
+    # 隨機選擇桌子來源（先用 source_names；空清單則 fall back 到 Tables collection）
     source_names = cfg.get('source_names', [])
     if not source_names:
-        col = bpy.data.collections.get('SB_Tables')
+        col = bpy.data.collections.get('Tables')
         if col is not None:
             source_names = [obj.name for obj in col.objects if obj.type == 'MESH']
 
@@ -850,7 +850,7 @@ def create_table() -> Tuple[Optional[object], Optional[Surface]]:
     available_tables = [(n, o) for n, o in available_tables if o is not None]
 
     if not available_tables:
-        print(f"  [!] 找不到桌子: source_names={source_names}, SB_Tables collection 也不存在")
+        print(f"  [!] 找不到桌子: source_names={source_names}, Tables collection 也不存在")
         return None, None
 
     source_name, source_obj = random.choice(available_tables)
@@ -1220,7 +1220,7 @@ def discover_glass_objects() -> list:
     if not cfg.get('enabled', False):
         return []
 
-    col_name = cfg.get('collection', 'Copos')
+    col_name = cfg.get('collection', 'Glass')
     col = bpy.data.collections.get(col_name)
     if col is None:
         return []

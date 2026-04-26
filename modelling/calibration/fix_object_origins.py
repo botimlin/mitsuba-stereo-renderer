@@ -13,7 +13,7 @@ import bpy
 # ============================================================
 
 # 要整理的 Collections
-COLLECTIONS_TO_FIX = ['Copos', 'SB_Vases', 'SB_Lamps', 'SB_Furniture', 'SB_Plants', 'SB_Decor']
+COLLECTIONS_TO_FIX = ['Glass', 'Tables', 'Furniture', 'Cabinets', 'Decor']
 
 # ============================================================
 # 主要函數

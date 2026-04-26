@@ -34,7 +34,7 @@ mitsuba-stereo-renderer/
 │   └── stereo_renderer.py               # Stereo renderer
 ├── modelling/
 │   ├── blender_glass_randomizer.py      # Blender scene randomizer (main)
-│   ├── merge_glass_objects.py           # Import a Copos glass collection from an external .blend
+│   ├── merge_glass_objects.py           # Import a glass-cup collection from an external .blend
 │   ├── check_blend_objects.py           # Diagnostic: inspect collections / verify naming contract
 │   └── calibration/                     # Coordinate calibration tools
 │       ├── fix_object_origins.py        # Reset origin to bottom-center, apply transforms
@@ -121,11 +121,11 @@ The randomizer auto-discovers candidate meshes from named **Blender collections*
 
 | Collection | Purpose |
 |---|---|
-| `Copos` | Glass cup objects (the renderer marks all meshes here as `Glass_Clear`) |
-| `SB_Tables` | Candidate tables (or override `table.source_names` in the CONFIG dict directly) |
-| `SB_Furniture` | Floor furniture — chairs, stools, lamps, radiators, trolleys, etc. |
-| `SB_Cabinets` | Large cabinets / shelves (rotation-locked placement) |
-| `SB_Decor` | Tabletop decorations — vases, small props |
+| `Glass`     | Glass cup objects (the renderer treats all meshes here as transparent and expects the material `Glass_Clear`) |
+| `Tables`    | Candidate tables (one is picked at random per scene; or override `table.source_names` in the CONFIG dict directly) |
+| `Furniture` | Floor furniture — chairs, stools, lamps, radiators, trolleys, etc. |
+| `Cabinets`  | Large cabinets / shelves (rotation-locked placement) |
+| `Decor`     | Tabletop decorations — vases, small props |
 
 Any collection that is missing or empty causes that category to be skipped — the script will not crash. Use `modelling/check_blend_objects.py` to verify your `.blend` matches the contract.
 

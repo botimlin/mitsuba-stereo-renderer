@@ -7,31 +7,26 @@ Verifies whether the currently open .blend follows the naming contract that
 
     Required collections
     --------------------
-    Copos          - glass cup mesh objects
-    SB_Tables      - candidate table mesh objects (optional if `table.source_names` is set)
-    SB_Furniture   - floor furniture (chairs, lamps, etc.)
-    SB_Cabinets    - large cabinets / shelves
-    SB_Decor       - tabletop decorations (vases, etc.)
-    SB_Vases       - reserved (alternative decor grouping)
-    SB_Lamps       - reserved
-    SB_Plants      - reserved
+    Glass      - glass cup mesh objects (renderer treats these as transparent)
+    Tables     - candidate table mesh objects (optional if you set
+                 `table.source_names` directly in the randomizer CONFIG)
+    Furniture  - floor furniture (chairs, stools, lamps, etc.)
+    Cabinets   - large cabinets / shelves (rotation-locked placement)
+    Decor      - tabletop decorations (vases, small props)
 
-If any of these are missing the randomizer falls back gracefully (no items
-of that category get placed). This script tells you which collections are
-present and how many mesh objects they contain.
+If any collection is missing or empty the randomizer falls back gracefully —
+that category simply produces no items. This script tells you which
+collections are present and how many mesh objects each one contains.
 """
 
 import bpy
 
 REQUIRED_COLLECTIONS = [
-    'Copos',
-    'SB_Tables',
-    'SB_Furniture',
-    'SB_Cabinets',
-    'SB_Decor',
-    'SB_Vases',
-    'SB_Lamps',
-    'SB_Plants',
+    'Glass',
+    'Tables',
+    'Furniture',
+    'Cabinets',
+    'Decor',
 ]
 
 print("\n" + "=" * 60)
