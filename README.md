@@ -15,7 +15,7 @@ For each scene the pipeline outputs:
 - **RGB stereo pair** — `left.exr` and `right.exr`
 - **Depth** (left viewpoint, in meters)
 - **Disparity** (in pixels, ray-depth → Z-depth corrected)
-- **Glass region masks** — left, right, and intersection (for evaluation)
+- **Glass region masks** — left view (training, aligned to GT disparity), right view, and left ∩ right intersection (strict evaluation)
 - **Per-scene JSON** with camera + lighting parameters and seed
 
 The pipeline has three stages:
@@ -234,15 +234,23 @@ python Renderer/stereo_renderer.py \
 ├── right.exr              # Right camera RGB (float32)
 ├── depth.exr              # GT depth (meters, left viewpoint)
 ├── disparity.exr          # GT disparity (pixels)
-├── glass_mask_left.png    # Glass mask, left view
-├── glass_mask_right.png   # Glass mask, right view
-├── glass_mask.png         # Intersection (training / strict eval)
+├── glass_mask_left.png    # Glass mask, left view — pixel-aligned to depth.exr / disparity.exr (use this for training)
+├── glass_mask_right.png   # Glass mask, right view (auxiliary)
+├── glass_mask.png         # Pixel-wise (left ∩ right) — strict evaluation, drops monocular-only glass regions
 ├── params.json            # Camera poses, intensities, seed, SPP
 ├── {scene_name}_report.json  # Per-scene quality report
 └── preview/
     ├── left.png
     └── right.png
 ```
+
+#### Which mask should I use?
+
+The depth and disparity ground truth are rendered from the **left camera viewpoint** (`depth_camera_position()` returns the left camera position). This means:
+
+- **Training loss on glass regions** → use `glass_mask_left.png`. It is on the same pixel grid as `disparity.exr` and `depth.exr`, so a boolean indexing of disparity by this mask Just Works.
+- **Strict / "two-view consistent" evaluation** → use `glass_mask.png` (intersection). It excludes glass pixels that are only visible from one camera (occluded in the other), where stereo disparity is fundamentally undefined. Note that this is a *pixel-wise* AND of the two view masks, not a disparity-warped intersection — it is conservative but cheap and works well for most cases.
+- **Right-view inspection / debugging only** → `glass_mask_right.png`. Don't pair this with the left-view depth.
 
 ### Disparity Computation
 
