@@ -2,7 +2,7 @@
 
 **Purpose-built to generate stereo training data for deep-learning models that perceive transparent objects in indoor scenes** — glass doors, windows, partitions, drinkware on tables, and similar surfaces that defeat standard depth sensors.
 
-It is a standalone GPU renderer that combines a Blender procedural scene randomizer with a Mitsuba 3 (`cuda_ad_rgb`) physically-based renderer. The output is a complete, ready-to-train dataset: rectified stereo pairs paired with pixel-perfect depth, disparity, and glass-region masks, all with reproducible per-scene seeds.
+It is a standalone GPU renderer that combines a Blender procedural scene randomizer with a Mitsuba 3 (`cuda_ad_rgb`) physically-based renderer. Each scene is a **closed 6-wall chamber** (floor, ceiling, four walls — fully enclosed, no open windows or skybox) populated with a table, randomized furniture, and one or more glass slabs / cups. The chamber design constrains all lighting to the in-scene back-wall LED panel plus ceiling fill lights, so the reflection / refraction physics on the glass surfaces are well-controlled and reproducible across scenes. The output is a complete, ready-to-train dataset: rectified stereo pairs paired with pixel-perfect depth, disparity, and glass-region masks, all with reproducible per-scene seeds.
 
 Designed for training tasks such as:
 - transparent-object stereo matching / depth estimation
@@ -112,6 +112,8 @@ Scene layout:
 ---
 
 ## Stage 1: Blender Scene Generation
+
+The randomizer builds a **closed chamber** (6-wall enclosure: floor, ceiling, front/back/left/right walls) sized `CHAMBER_WIDTH × CHAMBER_HEIGHT × CHAMBER_DEPTH = 600 × 400 × 800 mm`, places a table inside it, scatters furniture, and inserts 1+ glass slabs or cups. Walls and floor get random textures from the texture pool; the ceiling shares the wall texture and carries area emitters for fill lighting.
 
 ### Prerequisites
 
