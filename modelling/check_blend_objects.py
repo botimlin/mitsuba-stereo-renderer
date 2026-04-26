@@ -1,60 +1,65 @@
 """
-檢查 Blender 檔案中的物件和 Collections
-在 Blender 中執行此腳本
+Inspect Blender file objects and collections.
+Run from the Blender Scripting tab.
+
+Verifies whether the currently open .blend follows the naming contract that
+`blender_glass_randomizer.py` expects:
+
+    Required collections
+    --------------------
+    Copos          - glass cup mesh objects
+    SB_Tables      - candidate table mesh objects (optional if `table.source_names` is set)
+    SB_Furniture   - floor furniture (chairs, lamps, etc.)
+    SB_Cabinets    - large cabinets / shelves
+    SB_Decor       - tabletop decorations (vases, etc.)
+    SB_Vases       - reserved (alternative decor grouping)
+    SB_Lamps       - reserved
+    SB_Plants      - reserved
+
+If any of these are missing the randomizer falls back gracefully (no items
+of that category get placed). This script tells you which collections are
+present and how many mesh objects they contain.
 """
 
 import bpy
 
+REQUIRED_COLLECTIONS = [
+    'Copos',
+    'SB_Tables',
+    'SB_Furniture',
+    'SB_Cabinets',
+    'SB_Decor',
+    'SB_Vases',
+    'SB_Lamps',
+    'SB_Plants',
+]
+
 print("\n" + "=" * 60)
-print("Blender 物件檢查")
+print("Blender object & collection inspector")
 print("=" * 60)
 
-# 檢查 Collections
-print("\n=== Collections ===")
+# All collections
+print("\n=== All Collections ===")
 for col in bpy.data.collections:
-    obj_count = len([o for o in col.objects if o.type == 'MESH'])
-    print(f"  {col.name}: {obj_count} mesh objects")
+    mesh_count = len([o for o in col.objects if o.type == 'MESH'])
+    print(f"  {col.name}: {mesh_count} mesh objects")
     for obj in col.objects:
         if obj.type == 'MESH':
-            dims = obj.dimensions
-            print(f"    - {obj.name} ({dims.x*1000:.0f}x{dims.y*1000:.0f}x{dims.z*1000:.0f}mm)")
+            d = obj.dimensions
+            print(f"    - {obj.name} ({d.x*1000:.0f}x{d.y*1000:.0f}x{d.z*1000:.0f}mm)")
 
-# 檢查需要的桌子物件
-print("\n=== 桌子物件 (VintageTable*) ===")
-table_names = ['VintageTable', 'VintageTable2', 'VintageTable3', 'Table']
-for name in table_names:
-    obj = bpy.data.objects.get(name)
-    if obj:
-        dims = obj.dimensions
-        print(f"  ✓ {name}: {dims.x*1000:.0f}x{dims.y*1000:.0f}x{dims.z*1000:.0f}mm")
-    else:
-        print(f"  ✗ {name}: 不存在")
-
-# 檢查 SB_* Collections
-print("\n=== SB_* Collections ===")
-sb_collections = ['SB_Vases', 'SB_Lamps', 'SB_Plants', 'SB_Decor', 'SB_Furniture']
-for col_name in sb_collections:
+# Required collections check
+print("\n=== Randomizer contract check ===")
+for col_name in REQUIRED_COLLECTIONS:
     col = bpy.data.collections.get(col_name)
-    if col:
-        mesh_objs = [o for o in col.objects if o.type == 'MESH']
-        print(f"  ✓ {col_name}: {len(mesh_objs)} objects")
-        for obj in mesh_objs[:5]:  # 只顯示前5個
-            print(f"      - {obj.name}")
-        if len(mesh_objs) > 5:
-            print(f"      ... 還有 {len(mesh_objs) - 5} 個")
-    else:
-        print(f"  ✗ {col_name}: 不存在")
-
-# 檢查 Copos Collection (玻璃)
-print("\n=== Copos Collection (玻璃) ===")
-copos = bpy.data.collections.get('Copos')
-if copos:
-    mesh_objs = [o for o in copos.objects if o.type == 'MESH']
-    print(f"  ✓ Copos: {len(mesh_objs)} objects")
-    for obj in mesh_objs:
-        dims = obj.dimensions
-        print(f"      - {obj.name} ({dims.x*1000:.0f}x{dims.y*1000:.0f}x{dims.z*1000:.0f}mm)")
-else:
-    print(f"  ✗ Copos: 不存在")
+    if col is None:
+        print(f"  [missing] {col_name}")
+        continue
+    mesh_objs = [o for o in col.objects if o.type == 'MESH']
+    print(f"  [ok]      {col_name}: {len(mesh_objs)} mesh objects")
+    for obj in mesh_objs[:5]:
+        print(f"              - {obj.name}")
+    if len(mesh_objs) > 5:
+        print(f"              ... and {len(mesh_objs) - 5} more")
 
 print("\n" + "=" * 60)

@@ -68,12 +68,14 @@ CONFIG = {
         'depth': 800.0,      # Y: 0 ~ 800
     },
 
-    # 桌子設定 - 在渲染器視野內 (配合縮小 chamber)
+    # Table — primary surface that holds glass cups.
+    # Override `source_names` with the names of mesh objects in your .blend
+    # to use as table sources. The script will pick one at random per scene.
     'table': {
         'enabled': True,
-        'source_names': ['VintageTable2', 'VintageTable3'],  # VintageTable 沒有材質，不使用
-        'position_x_range': (-30, 30),     # 縮小範圍
-        'position_y_range': (300, 450),    # 調整深度範圍
+        'source_names': [],                # e.g. ['Table', 'TableA', 'TableB']
+        'position_x_range': (-30, 30),
+        'position_y_range': (300, 450),
         'rotation_z_range': (-30, 30),
         'shape': 'circle',
     },
@@ -114,19 +116,16 @@ CONFIG = {
         },
     },
 
-    # 玻璃杯設定 (降低數量以減少 MC noise)
+    # Glass cups (auto-discovered from the `Copos` collection).
     'glass': {
-        'count_range': (1, 1),  # 固定 1 個杯子
+        'count_range': (1, 1),
         'min_count': 1,
         'edge_margin': 8.0,
         'auto_discover': {
             'enabled': True,
             'collection': 'Copos',
-            'sizes': {
-                'TaçaChampagne': (6, 6, 22),
-                'TaçaVinho': (10, 10, 23),
-                'CopoShot': (4, 4, 5),
-            },
+            # Optional per-object overrides (mm). Anything not listed uses default_size.
+            'sizes': {},
             'default_size': (8, 8, 15),
             'blacklist': [],
         },
@@ -153,63 +152,65 @@ CONFIG = {
     # 碰撞檢測
     'collision_margin': 15,
 
-    # 地板傢俱設定 (小物件)
+    # Floor furniture (small / medium items placed on the ground).
+    # If `items` is empty, the script auto-discovers all mesh objects in
+    # the configured `collection`. Override either field to customize.
     'ground_furniture': {
         'enabled': True,
         'count_range': (2, 4),
-        'items': [
-            {'name': 'brown chair', 'dims': (58, 58, 47)},
-            {'name': 'VintageArmChair', 'dims': (63, 63, 109)},
-            {'name': 'VintageChair', 'dims': (44, 51, 100)},
-            {'name': 'VintageChair2', 'dims': (47, 49, 90)},
-            {'name': 'VintageStool', 'dims': (42, 42, 54)},
-            {'name': 'VintageStool2', 'dims': (38, 36, 45)},
-            {'name': 'Stool_flow', 'dims': (30, 30, 26)},
-            {'name': 'retro_radiator', 'dims': (48, 21, 62)},
-            {'name': 'Gubi_Mategot_Trolley_mat(1)', 'dims': (48, 46, 37)},
-            {'name': 'secto_design_octo_lamp_190sm_obj', 'dims': (22, 22, 78)},
-        ],
+        'collection': 'SB_Furniture',
+        'items': [],
         'rotation_z': (0, 360),
         'x_range': (-120, 120),
         'y_range': (150, 400),
     },
 
-    # 櫃子設定 (大物件，獨立範圍)
-    # 直接定死中心點範圍，不管物件尺寸
+    # Cabinets (large items, independent placement range, rotation locked).
     'cabinets': {
         'enabled': True,
-        'count_range': (1, 1),  # 一個場景只放一個櫃子
-        'items': [
-            # 只保留小型櫃子（寬度 < 100mm）
-            {'name': 'Office_cabinet_1door_V1', 'dims': (60, 66, 78)},
-            {'name': 'Office_cabinet_1door_V2', 'dims': (54, 53, 88)},
-            {'name': 'Office_cabinet_2door_V1', 'dims': (60, 66, 113)},
-            {'name': 'Office_cabinet_2door_V2', 'dims': (60, 66, 113)},
-            {'name': 'Office_cabinet_tall', 'dims': (59, 65, 249)},
-            # 大型物件移除：Office_cabinet_3door(200), Lockers(220), Office_desk(293)
-        ],
-        # 完全禁止旋轉，避免AABB膨脹
+        'count_range': (1, 1),
+        'collection': 'SB_Cabinets',
+        'items': [],
         'rotation_z': (0, 0),
-        # 直接定死中心點範圍 (mm)
-        # X: -150 ~ +150 (最大物件66mm寬，旋轉後最大約93mm，加上93/2=47，150+47=197 < 300 OK)
-        # Y: 200 ~ 500 (前牆100，後面相機680)
         'center_x_range': (-150, 150),
         'center_y_range': (200, 500),
     },
 
-    # 桌面小物設定
+    # Tabletop items (vases, decor — auto-discovered from `SB_Decor`).
     'table_items': {
         'enabled': True,
         'count_range': (0, 2),
-        'items': [
-            # chrome_vase_v2 移除 - leaf.001 材質問題
-            {'name': 'copper_vase', 'dims': (11, 20, 55)},
-            {'name': 'skitsch_zucca_obj', 'dims': (54, 53, 23)},
-        ],
+        'collection': 'SB_Decor',
+        'items': [],
         'rotation_z': (0, 360),
         'edge_margin': 10.0,
     },
 }
+
+
+# ============================================================
+# Collection auto-discovery helper
+# ============================================================
+
+def discover_items_from_collection(col_name: str) -> list:
+    """Return [{'name': obj.name}, ...] for all mesh objects in the given
+    Blender collection. Returns [] if the collection does not exist."""
+    col = bpy.data.collections.get(col_name)
+    if col is None:
+        return []
+    return [{'name': obj.name} for obj in col.objects if obj.type == 'MESH']
+
+
+def resolve_items(cfg: dict) -> list:
+    """Resolve the `items` list for a placement category: prefer the explicit
+    `items` field, fall back to auto-discovery from `collection`."""
+    items = cfg.get('items', [])
+    if items:
+        return list(items)
+    col_name = cfg.get('collection')
+    if col_name:
+        return discover_items_from_collection(col_name)
+    return []
 
 
 # ============================================================
@@ -508,120 +509,6 @@ def get_material(name: str, color: Tuple[float, float, float], texture_path: Opt
         if mat:
             return mat
     return create_diffuse_material(name, color)
-
-
-# ============================================================
-# 材質烘焙 (為沒有 Image Texture 的材質生成 texture)
-# ============================================================
-
-def fix_vintage_furniture_materials():
-    """為 Vintage 系列家具綁定正確的 texture"""
-    print("  [修復] 檢查 Vintage 家具材質...")
-
-    texture_base = Path(CONFIG['textures']['base_dir']) / 'vintage_furniture'
-
-    # 物件名稱 -> 資料夾名稱的映射
-    vintage_mapping = {
-        'VintageArmChair': 'VintageArmChair',
-        'VintageChair': 'VintageChair',
-        'VintageChair2': 'VintageChair2',
-        'VintageStool': 'VintageStool',
-        'VintageStool2': 'VintageStool',  # 用同一個
-        'VintageTable': 'VintageTable',
-        'VintageTable2': 'VintageTable2',
-        'VintageTable3': 'VintageTable2',  # 用同一個
-        'BarStool': 'BarStool',
-        'BarTable': 'BarTable',
-    }
-
-    # 材質名稱 -> texture 檔案前綴的映射
-    material_to_prefix = {
-        'ArmChair': 'ArmChair',
-        'Chair': 'Chair',
-        'Chair.001': 'Chair',
-        'Stool': 'Stool',
-        'Stool.001': 'Stool',
-        'Table': 'Table',
-        'Table.001': 'Table',
-    }
-
-    fixed_count = 0
-
-    for obj in bpy.data.objects:
-        if obj.type != 'MESH':
-            continue
-
-        # 檢查是否是 Vintage 家具
-        folder_name = None
-        for prefix, folder in vintage_mapping.items():
-            if obj.name.startswith(prefix) or obj.name == prefix:
-                folder_name = folder
-                break
-
-        if not folder_name:
-            continue
-
-        texture_folder = texture_base / folder_name
-        if not texture_folder.exists():
-            print(f"    [!] 找不到資料夾: {texture_folder}")
-            continue
-
-        for slot in obj.material_slots:
-            mat = slot.material
-            if not mat or not mat.use_nodes:
-                continue
-
-            nodes = mat.node_tree.nodes
-            bsdf = nodes.get("Principled BSDF")
-            if not bsdf:
-                continue
-
-            base_color = bsdf.inputs.get("Base Color")
-            if not base_color:
-                continue
-
-            # 已經有 texture 連接，跳過
-            if base_color.is_linked:
-                continue
-
-            # 找對應的 texture 檔案
-            prefix = material_to_prefix.get(mat.name)
-            if not prefix:
-                # 嘗試從材質名稱推斷
-                prefix = mat.name.replace('.001', '').replace('.002', '')
-
-            # 尋找 Color texture
-            color_tex = None
-            for ext in ['.tga', '.png', '.jpg', '.jpeg']:
-                candidate = texture_folder / f"{prefix}_Color{ext}"
-                if candidate.exists():
-                    color_tex = str(candidate)
-                    break
-
-            if not color_tex:
-                # 嘗試其他命名方式
-                for f in texture_folder.iterdir():
-                    if 'color' in f.name.lower() or 'diffuse' in f.name.lower():
-                        color_tex = str(f)
-                        break
-
-            if color_tex:
-                # 創建 Image Texture 節點
-                try:
-                    img = bpy.data.images.load(color_tex, check_existing=True)
-                    tex_node = nodes.new('ShaderNodeTexImage')
-                    tex_node.image = img
-                    tex_node.name = "ColorTexture"
-
-                    # 連接到 Base Color
-                    mat.node_tree.links.new(tex_node.outputs['Color'], base_color)
-
-                    print(f"    [修復] {obj.name}/{mat.name} <- {Path(color_tex).name}")
-                    fixed_count += 1
-                except Exception as e:
-                    print(f"    [!] 載入失敗 {color_tex}: {e}")
-
-    print(f"  [修復] 完成，修復 {fixed_count} 個材質")
 
 
 def fix_indirect_texture_connections():
@@ -952,13 +839,18 @@ def create_table() -> Tuple[Optional[object], Optional[Surface]]:
     if not cfg.get('enabled', False):
         return None, None
 
-    # 隨機選擇桌子來源
+    # 隨機選擇桌子來源（先用 source_names；空清單則 fall back 到 SB_Tables collection）
     source_names = cfg.get('source_names', [])
+    if not source_names:
+        col = bpy.data.collections.get('SB_Tables')
+        if col is not None:
+            source_names = [obj.name for obj in col.objects if obj.type == 'MESH']
+
     available_tables = [(name, bpy.data.objects.get(name)) for name in source_names]
     available_tables = [(n, o) for n, o in available_tables if o is not None]
 
     if not available_tables:
-        print(f"  [!] 找不到桌子: {source_names}")
+        print(f"  [!] 找不到桌子: source_names={source_names}, SB_Tables collection 也不存在")
         return None, None
 
     source_name, source_obj = random.choice(available_tables)
@@ -1066,7 +958,7 @@ def place_ground_furniture(ground_occupied: list) -> list:
     if not cfg.get('enabled', False):
         return []
 
-    items = cfg.get('items', [])
+    items = resolve_items(cfg)
     if not items:
         return []
 
@@ -1155,7 +1047,7 @@ def place_cabinets(ground_occupied: list) -> list:
     if not cfg.get('enabled', False):
         return []
 
-    items = cfg.get('items', [])
+    items = resolve_items(cfg)
     if not items:
         return []
 
@@ -1250,7 +1142,7 @@ def place_table_items(surface: Surface) -> list:
     if not cfg.get('enabled', False) or surface is None:
         return []
 
-    items = cfg.get('items', [])
+    items = resolve_items(cfg)
     if not items:
         return []
 
@@ -1688,9 +1580,8 @@ def main():
     unit.length_unit = 'MILLIMETERS'
     unit.scale_length = 0.001
 
-    # 修復 Vintage 家具材質
+    # Reconnect indirect texture references
     print("\n修復材質...")
-    fix_vintage_furniture_materials()
     fix_indirect_texture_connections()
 
     # 搜尋玻璃物件

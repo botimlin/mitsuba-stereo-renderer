@@ -1,0 +1,93 @@
+name: "Bug — Scene Generation (Blender)"
+description: Issues with the Blender randomizer — bad placements, items outside the chamber, missing assets, etc.
+title: "[Scene Gen] "
+labels: ["bug", "scene-generation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a scene-generation bug. Many issues turn out to be a missing
+        Blender collection or wrong material name — please run
+        `modelling/check_blend_objects.py` first and include its output below.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing what's wrong.
+      placeholder: "e.g. Glass cups are spawning inside the cabinet AABB."
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Blender command you ran
+      render: bash
+      placeholder: |
+        blender your_scene.blend --background --python modelling/blender_glass_randomizer.py -- \
+            --seed 42 --count 5 --output ./scenes_output --texture_dir ./textures
+    validations:
+      required: true
+
+  - type: textarea
+    id: contract-check
+    attributes:
+      label: Output of `check_blend_objects.py`
+      description: |
+        Run this in your Blender Scripting tab and paste the full output. It tells us
+        whether your `.blend` matches the expected naming contract.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Blender stderr / stdout
+      description: Paste the full output from the failed run.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: blender-version
+    attributes:
+      label: Blender version
+      placeholder: "4.2.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Which placement category misbehaves?
+      multiple: true
+      options:
+        - Table
+        - Glass cups (Copos)
+        - Glass panels (random slabs)
+        - Ground furniture (SB_Furniture)
+        - Cabinets (SB_Cabinets)
+        - Tabletop items (SB_Decor)
+        - Walls / floor / ceiling
+        - Texture assignment
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-vs-actual
+    attributes:
+      label: Expected vs actual
+      description: What did you expect to see, and what did you actually see? Screenshots of the rendered scene help a lot.
+    validations:
+      required: true
+
+  - type: textarea
+    id: blend-file
+    attributes:
+      label: Source `.blend` (or how to regenerate it)
+      description: |
+        Attach a minimal `.blend` if possible. If it's confidential, describe the collection
+        contents (object names, dimensions) so we can reproduce on a stand-in.

@@ -117,10 +117,19 @@ The randomizer builds a **closed chamber** (6-wall enclosure: floor, ceiling, fr
 
 ### Prerequisites
 
-In your `.blend` file, prepare:
-- `Table` object (or named alternatives configured in the script)
-- `Copos` collection (glass cup objects)
-- Optional `SB_*`-prefixed diffuse decorations
+The randomizer auto-discovers candidate meshes from named **Blender collections** in your `.blend` file. Prepare these collections (each may be empty if you don't want that category):
+
+| Collection | Purpose |
+|---|---|
+| `Copos` | Glass cup objects (the renderer marks all meshes here as `Glass_Clear`) |
+| `SB_Tables` | Candidate tables (or override `table.source_names` in the CONFIG dict directly) |
+| `SB_Furniture` | Floor furniture — chairs, stools, lamps, radiators, trolleys, etc. |
+| `SB_Cabinets` | Large cabinets / shelves (rotation-locked placement) |
+| `SB_Decor` | Tabletop decorations — vases, small props |
+
+Any collection that is missing or empty causes that category to be skipped — the script will not crash. Use `modelling/check_blend_objects.py` to verify your `.blend` matches the contract.
+
+The renderer requires the glass material to be exactly `Glass_Clear` (case-insensitive); name the material on every glass mesh accordingly.
 
 ### Texture Assets
 
@@ -280,6 +289,23 @@ The renderer performs **exact matching** against `glass_clear` (case-insensitive
 - **other** → textured diffuse, fallback to flat color
 
 Split OBJ files are written to `tempfile.mkdtemp()` and cleaned up automatically after rendering.
+
+---
+
+## Contact & Issues
+
+Questions, bug reports, and feature requests are welcome:
+
+- **GitHub Issues** — please open an issue on this repository for anything reproducible (rendering bugs, scene-generation edge cases, documentation gaps, etc.). Include your Mitsuba / Blender / GPU info and a minimal repro when possible.
+- **Email the author** — for private inquiries, collaboration, or research questions, reach out via Gmail: [botimlin@gmail.com](mailto:botimlin@gmail.com).
+
+### Need a turnkey ready-to-render bundle?
+
+The repository ships with **code only**: it intentionally does not include a fully-populated `.blend` file or a complete texture set, because most furniture / glass / texture assets the author uses originate from third-party packs whose licenses don't allow public redistribution.
+
+If you have an **academic or time-critical need** (paper deadline, thesis, course project, ablation reproduction) and don't have the time to source and prepare your own assets, email [botimlin@gmail.com](mailto:botimlin@gmail.com) and the author can — at his discretion — share a working bundle (`.blend` + matching textures) for **personal academic use**. The bundle is provided as-is and remains subject to the upstream licenses of each individual asset; please do not redistribute it further or include it in a public release without verifying the license of every asset yourself.
+
+Pull requests are also welcome, especially for additional asset packs, calibration helpers, or non-glass material support.
 
 ---
 

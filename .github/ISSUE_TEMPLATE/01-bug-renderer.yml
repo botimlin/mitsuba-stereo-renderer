@@ -1,0 +1,99 @@
+name: "Bug — Renderer (Mitsuba)"
+description: Crashes, wrong outputs, or unexpected behavior in the Mitsuba stereo renderer.
+title: "[Renderer] "
+labels: ["bug", "renderer"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for filing a bug! Please give us enough information to reproduce it locally.
+
+        Before submitting, please:
+        1. Try with `--spp 64` first — many "wrong output" reports are just MC noise.
+        2. Check `scene_XXXX_report.json` for any QA flags.
+        3. Re-run with `--seed <n>` if the issue is intermittent.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One or two sentences describing what went wrong.
+      placeholder: "e.g. Disparity output has NaN values in glass regions when SPP < 256."
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command you ran
+      description: Exact CLI invocation, including flags.
+      render: bash
+      placeholder: |
+        python Renderer/stereo_renderer.py \
+            --input_dir ./scenes_output \
+            --output ./output \
+            --spp 1024 --seed 42
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error / log output
+      description: Paste the full stderr/stdout from the failing run. Include the variant line printed at startup.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: mitsuba-variant
+    attributes:
+      label: Mitsuba variant in use
+      description: From the `[Mitsuba] Using variant: ...` line at startup.
+      placeholder: "cuda_ad_rgb"
+    validations:
+      required: true
+
+  - type: input
+    id: mitsuba-version
+    attributes:
+      label: Mitsuba 3 version
+      description: "`pip show mitsuba | grep Version`"
+      placeholder: "3.5.2"
+    validations:
+      required: true
+
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU / driver
+      description: Output of `nvidia-smi` (first line) or your GPU model + driver.
+      placeholder: "RTX 3060, driver 535.183.01"
+
+  - type: input
+    id: os
+    attributes:
+      label: OS / Python
+      placeholder: "Windows 11 / Python 3.11"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scene
+    attributes:
+      label: Scene that triggers it
+      description: |
+        Either attach the failing OBJ + MTL (zipped) or describe how to regenerate it
+        (random seed used by `blender_glass_randomizer.py`, e.g. `--seed 42 --count 10`).
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: tried
+    attributes:
+      label: I've already tried
+      options:
+        - label: Reproducing with a fresh checkout
+        - label: A lower SPP (`--spp 64`) to isolate noise vs. logic
+        - label: A different scene (to rule out OBJ-specific issues)
+        - label: Single-GPU mode (`--num_gpus 1`)

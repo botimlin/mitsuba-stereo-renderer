@@ -1,0 +1,60 @@
+name: "Feature request"
+description: Suggest a new feature, asset support, or pipeline improvement.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to improve the renderer? Please describe the use case before
+        the implementation — context helps us scope the work correctly.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: |
+        Who hits it, how often, and what does the workaround currently look like?
+        "I'm always frustrated when..." style is welcome.
+      placeholder: |
+        e.g. I want to render scenes with curved transparent surfaces (bottles, lenses)
+        but the current dielectric BSDF roughness doesn't match real bottle distortion.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed solution
+      description: How would you like the renderer to behave? CLI flag? New config field? New output file?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this touch?
+      multiple: true
+      options:
+        - Renderer (Mitsuba scene / integrator / BSDF)
+        - Scene generation (Blender randomizer)
+        - Output format (EXR / PNG / mask / params.json)
+        - Calibration tools
+        - Tools (exr_to_png, exr_viewer)
+        - Documentation
+        - CI / packaging
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you've thought about and why you discarded them.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Reference papers, sample images, related projects, etc.
